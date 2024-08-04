@@ -126,10 +126,10 @@ cmake --help-command MESSAGE
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 ```
 
-* PROJECT：用于指定项目名称
+* PROJECT：用于指定项目名称和语言类型
 
 ```cmake
-PROJECT(hello_world)
+PROJECT(hello_world C CXX)
 ```
 
 * ADD_EXECUTABLE：用于指定编译源代码与可执行程序
@@ -171,6 +171,27 @@ TARGET_LINK_LIBRARYS(hello_world static_library)
 INCLUED_DIRECTORIES(incluedFiles)
 ```
 
+* FIND_XXX：以下命令都是用于搜索指定的目标文件，以下是可以选的配置选项：
+
+```cmake
+# 参数 HINTS | PATHS
+HINTS：先搜索指定路径，再搜索系统路径
+PATHS：先搜索系统路径，再搜索指定路径
+# 参数 NO_CACHE
+搜索结果将存储在普通变量中而不是CMakeCache.txt中
+# 参数 REQUIRED
+如果没有找到指定头文件，就出发错误提示，变量会设为 <VAR>-NOTFOUND
+
+# FIND_PATH：用于查找指定文件对应的路径
+FIND_PATH(incluedPath NAMES hello_world.c HINTS ${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/test)
+# FIND_LIBRARY：用于查找依赖库文件
+FIND_LIBRARY(librarys NAMES opencv2 HINTS ${PROJECT_SOURCE_DIR}/3rd)
+# FIND_PROGRAM：用于查找可执行程序
+FIND_PROGRAM(program NAMES ffmpeg HINTS ${PROJECT_SOURCE_DIR}/bin)
+# FIND_PACKAGE：用于查找包，通常配合 XXXCONFIG.cmake 和 FINDXXX.cmake 文件使用(这两个文件由库作者提供支持)
+FIND_PACKAGE(c_tools REQUIRED)
+```
+
 ### 内置变量
 
 CMake提供了一些内置的变量，便于获取设置编译时的环境参数。
@@ -186,10 +207,38 @@ CMake提供了一些内置的变量，便于获取设置编译时的环境参数
 
 * CMAKE_C_FLAGS：C编译器的编译选项
 * CMAKE_CXX_FLAGS：C++编译器的编译选项
+* CMAKE_SKIP_RPATH: 跳过[运行期查找路径](#运行期查找路径)
 
 到此整个CMake基础知识和构建相关内容已经全部结束，后续内容是对实际开发使用过程中的总结。
 
 ### 杂项1：项目
 
-从工程学的角度来说，定义良好的项目结构决定着以后项目的质量和未来的走向，不仅能够提高项目的可读性还便于其他开发者能够快速清晰的认识到整个项目的结构层级。
+从工程学的角度来说，定义良好的项目结构决定着项目的质量和未来的走向，不仅能够提高项目的可读性还便于其他开发者能够快速清晰的认识到整个项目的结构层级。
 
+
+
+### 杂项2：编译原理
+
+该章节主要记录一下实际学习中遇到的一些编译原理相关知识以及关键字解析。
+
+##### GCC编译流程
+
+gcc 与 g++ 分别是 gnu 的 c & c++ 编译器 gcc/g++ 在执行编译工作的时候，总共需要4步：
+
+* 预编译生成 .i 的文件
+* 将预处理后的文件转化为汇编码，生成 .s 文件
+* 由汇编码转化为机器码 .o 文件
+* 链接所有 .o 文件生成可执行程序
+
+##### Linux环境下gcc编译链接库
+
+通常使用编译参数 -l 可以用于指定链接库，Linux系统默认提供了一些库可以用于链接使用：
+
+* 压缩库，编译参数 -lz
+* 实时库(real time)，编译参数 -lrt
+* 数学库，编译参数 -lm
+* 标准C库，编译参数 -lc
+
+##### 运行期查找路径
+
+所谓的运行期查找路径(RPATH, runtime search path)就是程序用于链接动态库时的查询路径，它规定了可执行程序在寻找动态库文件时的第一优先位置，当程序需要优先链接本地环境下的动态时可以通过设置该值。
