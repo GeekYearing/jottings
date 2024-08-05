@@ -226,6 +226,19 @@ cmake_parse_arguments_demo2("https://github.com", "https://gitlab.com/", C "a.c"
 # 执行结果与上述一致
 ```
 
+* GET/SET_PROPERTY：获取/设置全局变量
+
+```cmake
+# 参数 PROPERTY
+必需的参数，后面接属性的名称，其余的参数对应的是属性的值，以分号分隔。
+# 参数 APPEND 和 APPEND_STRING
+APPEND 表示那么后面的 <value1> 将以列表的形式附加到指定属性的后面。
+APPEND_STRING 表示后面的 <value1> 将以字符串的形式添加到属性的后面。
+
+SET_PROPERTY(GLOBAL APPEND PROPERTY SOURCE_LIST "test/src")
+GET_PROPERTY(FILES GLOBAL APPEND PROPERTY SOURCE_LIST)
+```
+
 ### 内置变量
 
 CMake提供了一些内置的变量，便于获取设置编译时的环境参数。
