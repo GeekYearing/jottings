@@ -192,6 +192,40 @@ FIND_PROGRAM(program NAMES ffmpeg HINTS ${PROJECT_SOURCE_DIR}/bin)
 FIND_PACKAGE(c_tools REQUIRED)
 ```
 
+* CMAKE_PARSE_ARGUMENTS：用于解析函数或宏的参数，并定义一组保存相应选项值的变量。
+
+```cmake
+# 版本1: CMAKE_PARSE_ARGUMENTS(<prefix> <options> <one_value_keywords> <multi_value_keywords> <args>...)，支持在宏和函数中调用
+FUNCTION(cmake_parse_arguments_demo1)
+	CMAKE_PARSE_ARGUMENTS("_", "CSDN GITHUB", "C", "PYTHON JAVA", ${ARGN})
+	
+	MESSAGE("__CSDN: ${__CSDN}")
+	MESSAGE("__GITHUB: ${__GITHUB}")
+	MESSAGE("__C: ${__C}")
+	MESSAGE("__PYTHON: ${__PYTHON}")
+	MESSAGE("__JAVA: ${__JAVA}")
+	MESSAGE("__UNPARSED_ARGUMENTS: ${__UNPARSED_ARGUMENTS}")
+END_FUNCTION()
+cmake_parse_arguments_demo1(C "a.c" PYTHON "a.py" "b.py" CSDN http FTP)
+
+# 执行结果
+__CSDN: TRUE
+__GITHUB: FALSE
+__C: a.c
+__PYTHON: a.py b.py
+__JAVA: 
+__UNPARSED_ARGUMENTS: http FTP
+
+# 版本2：CMAKE_PARSE_ARGUMENTS(PARSE_ARGV <N> <prefix> <options> <one_value_keywords> <multi_value_keywords>)，仅支持在函数中调用，与版本1不同的是它需要指定参数开始的下标
+FUNCTION(cmake_parse_arguments_demo2)
+	CMAKE_PARSE_ARGUMENTS(2, "_", "CSDN GITHUB", "C", "PYTHON JAVA", ${ARGN})
+	...
+END_FUNCTION()
+cmake_parse_arguments_demo2("https://github.com", "https://gitlab.com/", C "a.c" PYTHON "a.py" "b.py" CSDN http FTP)
+
+# 执行结果与上述一致
+```
+
 ### 内置变量
 
 CMake提供了一些内置的变量，便于获取设置编译时的环境参数。
