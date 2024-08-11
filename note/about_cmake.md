@@ -165,6 +165,18 @@ ADD_LIBRARY(shared_library SHARED ${sourceFiles})
 TARGET_LINK_LIBRARYS(hello_world static_library)
 ```
 
+* TARGET_INCLUDE_DIRECTORIES：用于指定目标程序需要包含的头文件
+
+```cmake
+TARGET_INCLUDE_DIRECTORIES(hello_world static_library_include)
+```
+
+* TARGET_COMPILE_DEFINITIONS：用于指定目标程序编译需要包含的宏定义
+
+```cmake
+TARGET_COMPILE_DEFINITIONS(hello_world static_library_define)
+```
+
 * INCLUED_DIRECTORIES：用于添加头文件路径
 
 ```cmake
@@ -255,6 +267,7 @@ CMake提供了一些内置的变量，便于获取设置编译时的环境参数
 * CMAKE_C_FLAGS：C编译器的编译选项
 * CMAKE_CXX_FLAGS：C++编译器的编译选项
 * CMAKE_SKIP_RPATH: 跳过[运行期查找路径](#运行期查找路径)
+* GENERATOR_EXPRESSION：用于编译阶段条件化处理的工具，能减少使用条件判断的复杂性。包括条件表达式、逻辑操作、比较表达式、字符串变换和 List 相关操作。
 
 到此整个CMake基础知识和构建相关内容已经全部结束，后续内容是对实际开发使用过程中的总结。
 
