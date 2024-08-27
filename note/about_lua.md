@@ -421,5 +421,59 @@ thread用于表示执行的独立线路，在Lua中最主要的线程是协程�
 
 ##### userdata（自定义类型）
 
+userdata是一种用户自定义数据，通常用于表示C/C++中的结构体和指针存储到Lua中调用。
 
+### 模块和包
 
+在Lua中，模块本质上就是创建一个由变量、函数等已知元素组成的table变量，通过导出该变量就能够实现常量、函数导出的导出功能，创建一个module.lua的案例如下：
+
+```lua
+-- module.lua
+module = {}
+
+-- 导出变量
+module.version = [1, 0, 0]
+
+-- 导出函数
+module.my_function = function()
+  print("my function")
+end
+
+-- 该函数不进行导出
+local function _internel_function()
+  print("internel function")
+end
+
+-- 导出函数来调用局部函数
+module.my_function1 = function()
+  _internel_function()
+end
+
+-- 最后导出该表
+return module
+```
+
+通过以上案例可知，本质上封装一个模块就等同于定义table变量，导入该模块的地方只需要通过table变量的操作方式就能获取模块中的变量或函数。导入模块的方式如下：
+
+```lua
+-- 导入模块使用 require 关键字
+require("module")
+print(module.my_function())
+>> my function
+print(module.my_function1())
+>> internel function
+
+-- 也可以通过变量来存储该表
+local my_module = require("module")
+print(table.concat(my_module.version, "."))
+>> 1.0.0
+```
+
+默认情况下，Lua会根据环境变量LUA_PATH去查找该模块，如果没有定义，则通过编译时定义的默认路径来初始化。
+
+在Lua中，通常调用C都是使用包的方式实现的，本质上就是使用动态链接的方式（dlopen）将C函数链接到Lua中，然后通过函数指针的方式（dlsym）使用C函数，具体使用的方式如下：
+
+```lua
+local path = "/usr/local/lua/lib/libluasocket.so"
+local c_pack = loadlib(path, "luaopen_socket")
+```
