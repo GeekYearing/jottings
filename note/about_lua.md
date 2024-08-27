@@ -149,7 +149,7 @@ end
 
 ### 数据类型
 
-Lua一共支持8种不同的数据类型，分别是 nil、boolean、number、string、userdata、function、thread 和 table。
+Lua一共支持8种不同的数据类型，分别是 nil、boolean、number、string、table、function、thread 和 userdata。
 
 | 数据类型 | 说明                                                         |
 | -------- | ------------------------------------------------------------ |
@@ -158,8 +158,9 @@ Lua一共支持8种不同的数据类型，分别是 nil、boolean、number、st
 | number   | 双精度实浮点值。                                             |
 | string   | 由一组单引号或双引号包含的值。                               |
 | table    | 一组包含一个或多个键值对的值，键可以是数字、字符串和表类型，通常可以用于表示数组、字典等。 |
-| userdata | 任意存储在C数据结构的值。                                    |
 | function | 包含函数指针的值，可以是C或者Lua。                           |
+| thread   | 表示执行的独立线路，用于执行协同程序。                       |
+| userdata | 任意存储在C数据结构的值。                                    |
 
 ##### nil（空）
 
@@ -269,7 +270,7 @@ Lua为字符串类型提供了默认的方法，例如字符串替换、字符�
   string.sub(s, i, [, j])
   s：要截取的字符串
   i：截取开始位置
-  j：截取结束位置，默认为-1，最后一个字符
+  j：截取结束位置，默认为-1, 最后一个字符
 ]]
 print(string.sub("prefix--runoobgoogletaobao--suffix", 4, 15))
 >> fix--runoobg
@@ -352,8 +353,8 @@ print(string.sub("Deadline is 18/08/2024, firm", string.find("Deadline is 18/08/
   %w - 与任何字母/数字配对
   %x - 与任何十六进制数配对
   %z - 与任何代表0的字符配对
-  %x(此处x是非字母非数字字符) - 与字符x配对. 主要用来处理表达式中有功能的字符(^$()%.[]*+-?)的配对问题, 例如%%与%配对
-  [数个字符类] - 与任何[]中包含的字符类配对. 例如[%w_]与任何字母/数字, 或下划线符号(_)配对
+  %x(此处x是非字母非数字字符) - 与字符x配对, 主要用来处理表达式中有功能的字符(^$()%.[]*+-?)的配对问题, 例如%%与%配对
+  [数个字符类] - 与任何[]中包含的字符类配对, 例如[%w_]与任何字母/数字, 或下划线符号(_)配对
   [^数个字符类] - 与任何不包含在[]中的字符类配对. 例如[^%s]与任何非空白字符配对
 ]]
 print(string.gsub("hello, up-down!", "%A", "."))
@@ -370,4 +371,55 @@ print(string.rep("123", 2))
 ```
 
 ##### table（表）
+
+table表示由一组或多组任意非nil值作为索引的关联性数组，用于实现数组、字典等数据结构类型。
+
+```lua
+local empty_table = {}                                 -- 创建空表
+local array_table = {"1", "2", "3"}                    -- 使用table实现数组
+local dict_table = {["123"] = "4444", ["aaa"] = 333}   -- 使用table实现字典
+
+print(type(empty_table))
+>> table
+print(type(array_table))
+>> table
+print(type(dict_table))
+>> table
+
+print(#dict_table)      -- 可以通过 # 获取table当前的长度
+>> 2
+```
+
+##### function（函数）
+
+function表示由C或Lua编写的函数指针，支持将lambda表达式赋值给变量。
+
+```lua
+function my_function(args)
+	print(args)
+end
+
+print(my_function("123"))
+>> 123
+local function_ptr = my_function
+print(function_ptr("123"))
+>> 123
+
+-- 将lambda表达式赋值给变量
+local function_ptr = function ()
+  return "123"
+end
+print(function_ptr())
+>> 123
+```
+
+##### thread（线程）
+
+thread用于表示执行的独立线路，在Lua中最主要的线程是协程，协程在任意时刻都只能运行一个，并且处于运行状态的协程只有被挂起才能够暂停。
+
+> 在C中实现协程，主要是通过 setjmp 和 longjmp 实现，这两个函数支持跨函数式跳到任意位置执行，并且恢复 setjmp 时的堆栈状态。
+
+##### userdata（自定义类型）
+
+
 
