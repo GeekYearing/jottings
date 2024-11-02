@@ -20,9 +20,9 @@ cmake是一款跨平台的代码编译工具集，从可执行程序来看它分
  
 # 编译脚本
 -- CMakeLists.txt
-  CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
-  PROJECT(hello_world)
-  ADD_EXECUTABLE(hello_world hello_world.c)
+  cmake_minimum_required(VERSION 2.6)
+  project(hello_world)
+  add_executable(hello_world hello_world.c)
 
 # 执行编译
 -- cmd/bash
@@ -48,15 +48,15 @@ CMake定义的语法规则如下：
 * 变量：仅有数字和字符串两种变量类型，通过SET命令进行定义，如果需要使用变量则只需要在变量名外增加 ${} 进行包裹。
 
 ```cmake
-SET(timeNow, "23:00:00")
-MESSAGE("time now is ${timeNow}")
+set(timeNow, "23:00:00")
+message("time now is ${timeNow}")
 ```
 
 * 运算：内置了EXPR表达式计算工具，通过内置提供的MATH函数，能够实现变量的运算(加、减、乘、除、取余...)。
 
 ```cmake
-MATH(EXPR res "${a} + ${b}")
-MESSAGE("a + b : ${res}")
+math(EXPR res "${a} + ${b}")
+message("a + b : ${res}")
 # 其他运算符类似, 替换对应的运算操作符即可...
 
 # 注：这里值得一提的是，可以通过命令行给指定变量设置值，例如：下面命令会得到 "a + b : 3" 的结果：
@@ -68,42 +68,42 @@ cmake -DCMAKE_BUILD_TYPE=DEBUG
 * 流程控制：与大部分语言类似，可以通过if-else、while、foreach等语法对编译流程进行控制。
 
 ```cmake
-IF (ARCH MATCHS "x86")
+if (ARCH MATCHS "x86")
   ...
-ELSE()
+else()
   ...
-ENDIF()
+endif()
 
-SET(i, "0")
-WHILE (${i} LESS "5")
+set(i, "0")
+while (${i} LESS "5")
   ...
-ENDWHILE()
+endwhile()
 
-FOREACH (${i} range "5")   # 支持枚举 FOREACH (language C C++ Python Java)
+foreach (${i} range "5")   # 支持枚举 FOREACH (language C C++ Python Java)
   ...
-ENDFOREACH()
+endforeach()
 ```
 
 * 宏与函数：CMake中的宏与C语言的宏定义不太一样，这里的宏跟函数用法一致，只是为闭包内部处理的变量作用域是全局的。
 
 ```cmake
 # 定义名称为 setTime 的函数
-FUNCTION(setTime timeUS)
-  MESSAGE("${timeUS}")
-  MATH(EXPR timeMS ${timeUS}/1000)
-ENDFUNCTION()
+function(setTime timeUS)
+  message("${timeUS}")
+  math(EXPR timeMS ${timeUS}/1000)
+endfunction()
 
 # 执行 setTime(1000) 后，获取 timeMS 的值为空
-MESSAGE("timeMS = ${timeMS}") ==> "timeMs = " 
+message("timeMS = ${timeMS}") ==> "timeMs = " 
 
 # 定义名称为 setTime 的宏
-MACRO(setTime timeUS)
-  MESSAGE("${timeUS}")
-  MATH(EXPR timeMS ${timeUS}/1000)
-ENDMACRO()
+macro(setTime timeUS)
+  message("${timeUS}")
+  math(EXPR timeMS ${timeUS}/1000)
+endmacro()
 
 # 执行 setTime(1000) 后，获取 timeMS 的值为1ms
-MESSAGE("timeMS = ${timeMS}") ==> "timeMs = 1" 
+message("timeMS = ${timeMS}") ==> "timeMs = 1" 
 ```
 
 到此CMake整个语法内容就全部介绍完毕，通过这些语法就能够描述整个项目代码的编译流程，但是对于项目的构建还需要配合命令完成。
@@ -120,55 +120,55 @@ cmake --help-command MESSAGE
 
 在构建编译脚本时，会需要用到许多不同的命令参数，以下将介绍构建时常用的命令：
 
-* CMAKE_MINIMUM_REQUIRED：设置CMake最低版本
+* cmake_minimum_required：设置CMake最低版本
 
 ```cmake
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+cmake_minimum_required(VERSION 2.6)
 ```
 
-* PROJECT：用于指定项目名称和语言类型
+* project：用于指定项目名称和语言类型
 
 ```cmake
-PROJECT(hello_world C CXX)
+project(hello_world C CXX)
 ```
 
-* ADD_EXECUTABLE：用于指定编译源代码与可执行程序
+* add_executable：用于指定编译源代码与可执行程序
 
 ```cmake
-ADD_EXECUTABLE(hello_world hello_world.c)
+add_executable(hello_world hello_world.c)
 ```
 
-* AUX_SOURCE_DIRECTORY：用于将文件夹下的所有源文件存储在指定变量中
+* aux_source_directory：用于将文件夹下的所有源文件存储在指定变量中
 
 ```cmake
-AUX_SOURCE_DIRECTORY(. sourceFiles)
+aux_source_directory(. sourceFiles)
 ```
 
-* ADD_SUBDIRECTORY：用于添加一个需要进行构建的子目录
+* add_subdirectory：用于添加一个需要进行构建的子目录
 
 ```cmake
-ADD_SUBDIRECTORY(subPath)
+add_subdirectory(subPath)
 ```
 
-* ADD_LIBRARY：用于指定从一组源文件中编译出指定名称的静态/动态库文件
+* add_library：用于指定从一组源文件中编译出指定名称的静态/动态库文件
 
 ```cmake
 # 默认情况下，该指令是编译成静态库，也可以显式指定编译成静态库: ADD_LIBRARY(static_library STATIC ${sourceFiles})
-ADD_LIBRARY(static_library ${sourceFiles})
+add_library(static_library ${sourceFiles})
 # 需要编译动态库，则需要添加 SHARED 参数
-ADD_LIBRARY(shared_library SHARED ${sourceFiles})
+add_library(shared_library SHARED ${sourceFiles})
 ```
 
-* TARGET_LINK_LIBRARYS：用于指定目标程序需要链接的库文件
+* target_link_librarys：用于指定目标程序需要链接的库文件
 
 ```cmake
-TARGET_LINK_LIBRARYS(hello_world static_library)
+target_link_librarys(hello_world static_library)
 ```
 
-* TARGET_INCLUDE_DIRECTORIES：用于指定目标程序需要包含的头文件
+* target_include_directories：用于指定目标程序需要包含的头文件
 
 ```cmake
-TARGET_INCLUDE_DIRECTORIES(hello_world static_library_include)
+target_include_directories(hello_world static_library_include)
 ```
 
 * TARGET_COMPILE_DEFINITIONS：用于指定目标程序编译需要包含的宏定义
@@ -177,13 +177,13 @@ TARGET_INCLUDE_DIRECTORIES(hello_world static_library_include)
 TARGET_COMPILE_DEFINITIONS(hello_world static_library_define)
 ```
 
-* INCLUED_DIRECTORIES：用于添加头文件路径
+* include_directories：用于添加头文件路径
 
 ```cmake
-INCLUED_DIRECTORIES(incluedFiles)
+include_directories(incluedFiles)
 ```
 
-* FIND_XXX：以下命令都是用于搜索指定的目标文件，以下是可以选的配置选项：
+* find_xxx：以下命令都是用于搜索指定的目标文件，以下是可以选的配置选项：
 
 ```cmake
 # 参数 HINTS | PATHS
@@ -194,30 +194,30 @@ PATHS：先搜索系统路径，再搜索指定路径
 # 参数 REQUIRED
 如果没有找到指定头文件，就出发错误提示，变量会设为 <VAR>-NOTFOUND
 
-# FIND_PATH：用于查找指定文件对应的路径
-FIND_PATH(incluedPath NAMES hello_world.c HINTS ${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/test)
-# FIND_LIBRARY：用于查找依赖库文件
-FIND_LIBRARY(librarys NAMES opencv2 HINTS ${PROJECT_SOURCE_DIR}/3rd)
-# FIND_PROGRAM：用于查找可执行程序
-FIND_PROGRAM(program NAMES ffmpeg HINTS ${PROJECT_SOURCE_DIR}/bin)
-# FIND_PACKAGE：用于查找包，通常配合 XXXCONFIG.cmake 和 FINDXXX.cmake 文件使用(这两个文件由库作者提供支持)
-FIND_PACKAGE(c_tools REQUIRED)
+# find_path：用于查找指定文件对应的路径
+find_path(incluedPath NAMES hello_world.c HINTS ${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/test)
+# find_library：用于查找依赖库文件
+find_library(librarys NAMES opencv2 HINTS ${PROJECT_SOURCE_DIR}/3rd)
+# find_program：用于查找可执行程序
+find_program(program NAMES ffmpeg HINTS ${PROJECT_SOURCE_DIR}/bin)
+# find_package：用于查找包，通常配合 XXXCONFIG.cmake 和 FINDXXX.cmake 文件使用(这两个文件由库作者提供支持)
+find_package(c_tools REQUIRED)
 ```
 
-* CMAKE_PARSE_ARGUMENTS：用于解析函数或宏的参数，并定义一组保存相应选项值的变量。
+* cmake_parse_arguments：用于解析函数或宏的参数，并定义一组保存相应选项值的变量。
 
 ```cmake
-# 版本1: CMAKE_PARSE_ARGUMENTS(<prefix> <options> <one_value_keywords> <multi_value_keywords> <args>...)，支持在宏和函数中调用
-FUNCTION(cmake_parse_arguments_demo1)
-	CMAKE_PARSE_ARGUMENTS("_", "CSDN GITHUB", "C", "PYTHON JAVA", ${ARGN})
+# 版本1: cmake_parse_arguments(<prefix> <options> <one_value_keywords> <multi_value_keywords> <args>...)，支持在宏和函数中调用
+function(cmake_parse_arguments_demo1)
+	cmake_parse_arguments("_", "CSDN GITHUB", "C", "PYTHON JAVA", ${ARGN})
 	
-	MESSAGE("__CSDN: ${__CSDN}")
-	MESSAGE("__GITHUB: ${__GITHUB}")
-	MESSAGE("__C: ${__C}")
-	MESSAGE("__PYTHON: ${__PYTHON}")
-	MESSAGE("__JAVA: ${__JAVA}")
-	MESSAGE("__UNPARSED_ARGUMENTS: ${__UNPARSED_ARGUMENTS}")
-END_FUNCTION()
+	message("__CSDN: ${__CSDN}")
+	message("__GITHUB: ${__GITHUB}")
+	message("__C: ${__C}")
+	message("__PYTHON: ${__PYTHON}")
+	message("__JAVA: ${__JAVA}")
+	message("__UNPARSED_ARGUMENTS: ${__UNPARSED_ARGUMENTS}")
+endfunction()
 cmake_parse_arguments_demo1(C "a.c" PYTHON "a.py" "b.py" CSDN http FTP)
 
 # 执行结果
@@ -228,34 +228,36 @@ __PYTHON: a.py b.py
 __JAVA: 
 __UNPARSED_ARGUMENTS: http FTP
 
-# 版本2：CMAKE_PARSE_ARGUMENTS(PARSE_ARGV <N> <prefix> <options> <one_value_keywords> <multi_value_keywords>)，仅支持在函数中调用，与版本1不同的是它需要指定参数开始的下标
-FUNCTION(cmake_parse_arguments_demo2)
-	CMAKE_PARSE_ARGUMENTS(2, "_", "CSDN GITHUB", "C", "PYTHON JAVA", ${ARGN})
+# 版本2：cmake_parse_arguments(PARSE_ARGV <N> <prefix> <options> <one_value_keywords> <multi_value_keywords>)，仅支持在函数中调用，与版本1不同的是它需要指定参数开始的下标
+function(cmake_parse_arguments_demo2)
+	cmake_parse_arguments(2, "_", "CSDN GITHUB", "C", "PYTHON JAVA", ${ARGN})
 	...
-END_FUNCTION()
+endfunction()
 cmake_parse_arguments_demo2("https://github.com", "https://gitlab.com/", C "a.c" PYTHON "a.py" "b.py" CSDN http FTP)
 
 # 执行结果与上述一致
 ```
 
-* GET/SET_PROPERTY：获取/设置全局变量
+* get/set_property：获取/设置全局变量
 
 ```cmake
-# 参数 PROPERTY
+# 参数 property
 必需的参数，后面接属性的名称，其余的参数对应的是属性的值，以分号分隔。
-# 参数 APPEND 和 APPEND_STRING
-APPEND 表示那么后面的 <value1> 将以列表的形式附加到指定属性的后面。
-APPEND_STRING 表示后面的 <value1> 将以字符串的形式添加到属性的后面。
+# 参数 append 和 append_string
+append 表示那么后面的 <value1> 将以列表的形式附加到指定属性的后面。
+append_string 表示后面的 <value1> 将以字符串的形式添加到属性的后面。
 
-SET_PROPERTY(GLOBAL APPEND PROPERTY SOURCE_LIST "test/src")
-GET_PROPERTY(FILES GLOBAL APPEND PROPERTY SOURCE_LIST)
+set_property(GLOBAL APPEND PROPERTY SOURCE_LIST "test/src")
+get_property(FILES GLOBAL APPEND PROPERTY SOURCE_LIST)
 ```
 
 ### 内置变量
 
 CMake提供了一些内置的变量，便于获取设置编译时的环境参数。
 
-* PROJECT_SOURCE_DIR：目前正在处理的最上层目录，即 PROJECT() 命令所对应的文件夹
+* CMAKE_SOURCE_DIR：当前执行编译命令的顶层 CMakeLists.txt 目录
+
+* CMAKE_BINARY_DIR：当前执行编译命令的构建输出所在路径
 
 * CMAKE_BUILD_TYPE：控制构建类型，以下是目前可选值：
   * NONE：编译器默认值
