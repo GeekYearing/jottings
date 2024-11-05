@@ -117,11 +117,13 @@ void cdev_del(struct cdev* p);
 #include <linux/fs.h>
 #include <linux/cdev.h>
 
-static struct file_operations s_hello_file_operation = {
+static dev_t dev_id;
+
+static struct cdev s_hello_dev = {
     .owner = THIS_MODULE,
 };
 
-static struct cdev s_hello_dev = {
+static struct file_operations s_hello_file_operation = {
     .owner = THIS_MODULE,
 };
 
@@ -129,10 +131,10 @@ static int __init hello_init(void)
 {
   printk("Hello module init\n");
 
-  alloc_chrdev_region(&s_hello_dev.dev, 0, 1, "hello_cdev");
+  alloc_chrdev_region(&dev_id, 0, 1, "hello_cdev");
 
   cdev_init(&s_hello_dev, &s_hello_file_operation);
-  cdev_add(&s_hello_dev, s_hello_dev.dev, s_hello_dev.count);
+  cdev_add(&s_hello_dev, dev_id, 1);
 
   return 0;
 }
@@ -140,7 +142,7 @@ static int __init hello_init(void)
 static void __exit hello_exit(void)
 {
   cdev_del(&s_hello_dev);
-  unregister_chrdev_region(s_hello_dev.dev, s_hello_dev.count);
+  unregister_chrdev_region(dev_id, 1);
 
   printk("Hello module exit\n");
 }
@@ -174,53 +176,42 @@ void device_destroy(struct class* class, dev_t devt);
 从以上代码来看，设备节点本质上是一个由具体化的类对象，通过设备号与具体设备进行绑定，本质上就是创建一个文件，所以提供了 fmt 参数用于设置文件名称，具体的使用方式如下：
 
 ```c
-#include <linux/module.h>
-#include <linux/kernel.h>
-#include <linux/init.h>
-#include <linux/device.h>
-#include <linux/fs.h>
-#include <linux/cdev.h>
-
+续上例...
 static struct class* s_hello_class = NULL;
-static struct device* s_hello_device = NULL;
-
-static struct file_operations s_hello_file_operation = {
-    .owner = THIS_MODULE,
-};
-
-static struct cdev s_hello_dev = {
-    .owner = THIS_MODULE,
-};
-
+static struct device* s_hello_device = NULL;   
+ 
 static int __init hello_init(void)
 {
   printk("Hello module init\n");
 
-  alloc_chrdev_region(&s_hello_dev.dev, 0, 1, "hello_cdev");
+  alloc_chrdev_region(&dev_id, 0, 1, "hello_cdev");
 
   cdev_init(&s_hello_dev, &s_hello_file_operation);
-  cdev_add(&s_hello_dev, s_hello_dev.dev, 1);
+  cdev_add(&s_hello_dev, dev_id, 1);
 
-  s_hello_class = class_create(THIS_MODULE, "hello_device");
-  s_hello_device = device_create(s_hello_class, NULL, s_hello_dev.dev, NULL, "hello_device");
+  s_hello_class = class_create(THIS_MODULE, "hello_cdev");
+  s_hello_device = device_create(s_hello_class, NULL, dev_id, NULL, "hello_cdev");
 
   return 0;
 }
 
 static void __exit hello_exit(void)
 {
-  cdev_del(&s_hello_dev);
-  unregister_chrdev_region(s_hello_dev.dev, 1);
-  device_destroy(s_hello_class, s_hello_dev.dev);
+  device_destroy(s_hello_class, dev_id);
   class_destroy(s_hello_class);
+  cdev_del(&s_hello_dev);
+  unregister_chrdev_region(dev_id, 1);
 
   printk("Hello module exit\n");
 }
+...
+```
 
-module_init(hello_init);
-module_exit(hello_exit);
+将以上代码编译加载后，可以在 /dev/ 目录下得到一个名称为 hello_cdev 的字符设备，用户程序能够通过文件操作函数与之交互：
 
-MODULE_LICENSE("GPL");
+```bash
+$ ls -lrt /dev/
+crw------- 1 root    root    238,   0 Nov  5 01:28 hello_cdev
 ```
 
 ### IO驱动实现
