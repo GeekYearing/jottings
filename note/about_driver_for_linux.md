@@ -214,7 +214,44 @@ $ ls -lrt /dev/
 crw------- 1 root    root    238,   0 Nov  5 01:28 hello_cdev
 ```
 
-### IO驱动实现
+### 驱动硬件IO
 
+在板卡中所有硬件设备都对应一个唯一的物理地址，所以想要对具体硬件进行控制本质上就是在对应物理地址上的寄存器中写入数据，但为了安全性等方面考虑，操作系统引入了虚拟地址的概念（MMU），驱动程序要想访问具体物理地址必须先获得寄存器在操作系统中的虚拟地址，在 Linux 中提供了以下接口用于操作虚拟地址：
 
+```c
+static inline void __iomem *ioremap(unsigned long physaddr, unsigned long size);
+static inline void iounmap(void __iomem *addr);
+```
+
+虚拟地址获取完成后，可以直接通过指针直接访问这些地址，但不太优雅，所以 Linux 提供了以下接口来完成对虚拟地址的读写操作：
+
+```c
+u8 readb(const volatile void __iomem *addr);
+u16 readw(const volatile void __iomem *addr);
+u32 readl(const volatile void __iomem *addr);
+    
+void writeb(u8 value, volatile void __iomem *addr)
+void writew(u16 value, volatile void __iomem *addr)
+void writel(u32 value, volatile void __iomem *addr)
+```
+
+通过上文说明不难得知，想要控制对应的硬件包含以下步骤：
+
+* 查询硬件对应物理地址
+* 获取物理地址对应的虚拟地址，通过读/写接口操作寄存器
+
+这里以 RockPi 4B 的为例，实现对 GPIO4_D4 引脚来控制 LED 的亮灭，通常来说，驱动 GPIO 需要按照以下步骤完成：
+
+* 通过 CRU 寄存器使能对应的 ABP 总线
+* 通过 PMU 或 GRF 设置引脚复用
+* 设置 GPIO 寄存器的引脚方向
+* 设置或读取引脚的数据
+
+通过阅读芯片手册能够得到以下硬件寄存器对应的物理地址：
+
+```c
+CRU: 0xFF750000 + 0x037C
+PMU/GRF: 0xFF770000 + 0xE02C
+GPIO4: 0xFF790000
+```
 
