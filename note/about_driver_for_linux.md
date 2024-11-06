@@ -247,11 +247,57 @@ void writel(u32 value, volatile void __iomem *addr)
 * 设置 GPIO 寄存器的引脚方向
 * 设置或读取引脚的数据
 
-通过阅读芯片手册能够得到以下硬件寄存器对应的物理地址：
+通过阅读芯片手册能够找到硬件寄存器对应的物理地址：
 
 ```c
 CRU: 0xFF750000 + 0x037C
 PMU/GRF: 0xFF770000 + 0xE02C
 GPIO4: 0xFF790000
+```
+
+以下案例在驱动安装时会将 GPIO4_D2 对应的引脚置为高电平并点亮 LED 灯，卸载反之，具体的实现案例代码如下：
+
+```c
+#define CRU_ADDRESS (0xFF750000UL + 0x037CUL)
+#define GPIOD_ADDRESS (0xFF790000UL)
+
+static uint8_t __iomem *CRU = NULL;
+static uint8_t __iomem *GPIO4_DR = NULL;
+static uint8_t __iomem *GPIO4_DDR = NULL;
+
+static void hello_init_gpio(void)
+{
+  CRU = ioremap(0xFF760000 + 0x037c, 4);
+  writel(readl(CRU) & (~(0x1 << 5)), CRU);
+  writel(readl(CRU) | ((0x1 << 21)), CRU);
+
+  GPIO4_DR = ioremap(0xFF790000, 4);
+  GPIO4_DDR = ioremap(0xFF790000 + 0x0004, 4);
+  writel(readl(GPIO4_DR) & (0x1 << 28), GPIO4_DR);
+  writel(readl(GPIO4_DDR) & (0x1 << 28), GPIO4_DDR);
+}
+
+static void hello_deinit_gpio(void)
+{
+  writel(readl(GPIO4_DR) & (~(0x1 << 28)), GPIO4_DR);
+ 
+  iounmap(CRU);
+  iounmap(GPIO4_DR);
+  iounmap(GPIO4_DDR);
+}
+
+static int __init hello_init(void)
+{
+    ...
+    hello_init_gpio();
+    ...
+}
+
+static void __exit hello_exit(void)
+{
+    ...
+    hello_deinit_gpio();
+    ...
+}
 ```
 
