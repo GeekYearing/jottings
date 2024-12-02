@@ -60,13 +60,13 @@
 #define LCD_RST_Clr() GPIO_ResetBits(GPIOA,GPIO_Pin_0)//RES
 #define LCD_RST_Set() GPIO_SetBits(GPIOA,GPIO_Pin_0)
 
-#define LCD_DC_Clr() GPIO_ResetBits(GPIOA,GPIO_Pin_1)//DC     
+#define LCD_DC_Clr() GPIO_ResetBits(GPIOA,GPIO_Pin_1)//DC
 #define LCD_DC_Set() GPIO_SetBits(GPIOA,GPIO_Pin_1)
- 		     
+
 #define LCD_CS_Clr()  GPIO_ResetBits(GPIOA,GPIO_Pin_2)//CS
 #define LCD_CS_Set()  GPIO_SetBits(GPIOA,GPIO_Pin_2)
 
-#define LCD_BLK_Clr()  GPIO_ResetBits(GPIOA,GPIO_Pin_3)//BLK    
+#define LCD_BLK_Clr()  GPIO_ResetBits(GPIOA,GPIO_Pin_3)//BLK
 #define LCD_BLK_Set()  GPIO_SetBits(GPIOA,GPIO_Pin_3)
 
 
