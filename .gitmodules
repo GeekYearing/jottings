@@ -1,3 +1,0 @@
-[submodule "code/c_server"]
-	path = code/c_server
-	url = ../c_server.git
