@@ -1,0 +1,12 @@
+{
+  "files.associations": {
+    "cts_types_def.h": "c",
+    "stdint.h": "c",
+    "vcruntime.h": "c",
+    "cts_tiny.h": "c",
+    "cts_version.h": "c",
+    "cts_value.h": "c",
+    "cts_config.h": "c",
+    "cts_memory.h": "c"
+  }
+}
