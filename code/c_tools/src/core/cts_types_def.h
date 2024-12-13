@@ -15,11 +15,20 @@
 
 #include <stdint.h>
 
+#ifndef NULL
+#define NULL ((void*)0)
+#endif /*!NULL*/
+
 typedef uint8_t bool_t;
 #define TRUE 1
 #define FALSE 0
 
 struct _cts_value_t;
 typedef struct _cts_value_t cts_value_t;
+
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0]))
+
+#include "cts_assert.h"
+#include "cts_err.h"
 
 #endif /*!CTS_TYPES_DEF_H*/

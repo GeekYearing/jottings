@@ -39,6 +39,7 @@ typedef struct _cts_value_t {
 
 typedef struct _cts_string_t {
   const char* str;
+  uint16_t len;
   bool_t is_need_free;
 } cts_string_t;
 

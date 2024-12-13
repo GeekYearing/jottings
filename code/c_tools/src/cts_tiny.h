@@ -5,7 +5,7 @@
 #include "cts_config.h"
 
 /* core */
-#include "cts_mem.h"
-#include "cts_value.h"
+#include "core/cts_mem.h"
+#include "core/cts_value.h"
 
 #endif /*CTS_TINY_H*/
