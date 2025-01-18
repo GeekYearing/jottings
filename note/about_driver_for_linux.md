@@ -301,3 +301,99 @@ static void __exit hello_exit(void)
 }
 ```
 
+### 设备树（dts）
+
+在 Linux 中，设备树是一种用于描述硬件设备的结构化数据格式，使操作系统能够在启动时读取并识别硬件平台的配置信息。设备树源文件通常以 .dts 格式表示，需要通过编译生成 .dtb 文件，后者才能被加载到内核中使用。值得一提的是 .dts 和 .dtb 文件可以通过 dtc 工具进行相互转换。
+
+在使用 dtc 工具之前，需要安装 device-tree-compiler：
+
+```bash
+> sudo apt install device-tree-compiler
+```
+
+接下来以 RockPi 4B 为例，通过现有的 .dtb 文件来修改 gpio-led2 的默认功能（目前 gpio-led2 对应板卡的蓝灯，用来指示板卡当前的运行状态）。
+
+通常来说，系统运行的 .dtb 文件存储在 /boot/dtbs/ 文件夹下，但有时该文件夹下可能拥有多个环境的 .dtb 配置文件，这时可以通过以下命令来获取相关信息：
+
+```bash
+> uname -r
+4.4.154-116-rockchip-g86a614bc15b3
+> cat /sys/firmware/devicetree/base/compatible
+rockchip,rockpirockchip,rk3399
+> lscpu
+Architecture:        aarch64
+CPU op-mode(s):      32-bit, 64-bit
+Byte Order:          Little Endian
+CPU(s):              6
+On-line CPU(s) list: 0-5
+Thread(s) per core:  1
+Core(s) per socket:  3
+Socket(s):           2
+Vendor ID:           ARM
+Model:               4
+Model name:          Cortex-A53
+Stepping:            r0p4
+CPU max MHz:         1800.0000
+CPU min MHz:         408.0000
+BogoMIPS:            48.00
+Flags:               fp asimd evtstrm aes pmull sha1 sha2 crc32
+> ls -lrt /boot/dtbs/$(uname -r)/rockchip/
+...
+-rwxr-xr-x 1 root root  94549 Jan 12 08:14 rk3399-rock-pi-4b.dtb
+...
+```
+
+找到对应系统运行的 .dtb 文件之后，接下来通过 dtc 工具将文件转化为 .dts 。
+
+```bash
+> dtc --help
+...
+  -I, --in-format <arg>
+        Input formats are:
+                dts - device tree source text
+                dtb - device tree blob
+                fs  - /proc/device-tree style directory
+  -o, --out <arg>
+        Output file
+  -O, --out-format <arg>
+        Output formats are:
+                dts - device tree source text
+                dtb - device tree blob
+                yaml - device tree encoded as YAML
+                asm - assembler source
+ ...
+> dtc -I dtb -O dts -o /boot/dtbs/$(uname -r)/rockchip/rk3399-rock-pi-4b.dts /boot/dtbs/$(uname -r)/rockchip/rk3399-rock-pi-4b.dtb
+```
+
+以上命令将 rk3399-rock-pi-4b.dtb 进行转化并存储到 rk3399-rock-pi-4b.dts 文件中，接下来就只需要通过 vim 就能够修改 gpio-led2 的默认功能。
+
+```dts
+...
+gpio-leds {
+    compatible = "gpio-leds";
+    status = "okay";
+
+    user-led1 {
+        gpios = <0x19 0x1c 0x00>;
+        linux,default-trigger = "heartbeat";
+        default-state = "on";
+    };
+
+    user-led2 {
+        gpios = <0x19 0x1d 0x00>;
+        // linux,default-trigger = "heartbeat";
+        linux,default-trigger = "none";
+        // default-state = "on";
+        default-state = "off";
+    };
+};
+...
+```
+
+以上内容将 user-led2 的 linux,default-trigger 配置修改为 "none" 表示不再跟随板卡心跳进行反转电平以及 default-state 配置修改为 "off" 表示该灯不再默认开启，再将该 .dts 编译并替换原有的 .dtb 文件就应用了以上修改。
+
+```bash
+> dtc -I dts -O dtb -o /boot/dtbs/$(uname -r)/rockchip/rk3399-rock-pi-4b.dtb /boot/dtbs/$(uname -r)/rockchip/rk3399-rock-pi-4b.dts
+> reboot
+```
+
